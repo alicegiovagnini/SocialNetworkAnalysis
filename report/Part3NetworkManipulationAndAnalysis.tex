@@ -1,0 +1,74 @@
+\section{Network Manipulation and Analysis}
+\label{sec:part3}
+With $N=3$ members, $N{-}1 = 2$ tasks are addressed, one from each of the two clusters required by the assignment: an analytical task -- Link Prediction (Cluster~1) -- and a network-manipulation task -- Spreading~2, a custom diffusion model (Cluster~2). The standard epidemic models of the course serve only as a baseline for the latter.
+
+\subsection{TASK 1: LINK PREDICTION}
+Following Liben-Nowell \& Kleinberg~\cite{linkpred}, the edges are split into a training set (80\%) and a test set (20\%), and node pairs are scored on the training graph with four unsupervised predictors: Common Neighbors (CN), Jaccard, Adamic--Adar (AA) and Preferential Attachment (PA). Evaluation uses a balanced sample of 20{,}000 test edges (positives) and 20{,}000 random non-edges (negatives); AUC-ROC and precision@2000 are reported (Table~\ref{tab:lp}).
+
+\begin{table}[h]
+  \centering\small
+  \caption{Link prediction accuracy.}
+  \label{tab:lp}
+  \begin{tabular}{lcc}
+    \toprule
+    Predictor & AUC & P@2000 \\
+    \midrule
+    Common Neighbors        & 0.941 & 0.986 \\
+    Jaccard                 & 0.923 & 0.989 \\
+    Adamic--Adar            & \textbf{0.945} & 0.986 \\
+    Preferential Attachment & 0.823 & 0.934 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\noindent The three neighbourhood-based predictors are highly accurate (AUC $\approx 0.92$--$0.95$), with Adamic--Adar best -- consistent with the reference paper, since weighting shared neighbours by their (inverse) degree rewards specific, low-degree common contacts. Preferential Attachment, which ignores common neighbours and only multiplies the endpoint degrees, lags clearly behind (AUC $0.823$): in this network proximity matters more than mere popularity. The very high precision@k shows that the top ranked candidate links are almost all genuine missing edges.
+
+\subsection{TASK 2: SPREADING 2 -- a custom diffusion model}
+\paragraph{Baseline.} As a reference, the standard SI, SIS, SIR and Threshold models are first simulated with NDlib on the real network and, for SIR, on ER/BA graphs of comparable size, varying parameters and seeds (Figures~\ref{fig:diffmodels}--\ref{fig:diff}). SI saturates to full infection, SIS settles at an endemic equilibrium ($\approx 0.99$), SIR peaks at $\approx 0.90$ around iteration~8, and the Threshold model triggers an almost immediate total cascade -- unsurprising given the very high average degree ($222$). Across topologies the SIR curves almost overlap: on such a dense graph diffusion is fast and near-total everywhere, the real network even peaking marginally lower because its redundant intra-community edges are ``wasted'' on already-infected neighbours.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{figures/diffusion_models_real.png}
+  \caption{Baseline: SI, SIS, SIR and Threshold models on the real network.}
+  \label{fig:diffmodels}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{figures/diffusion_sir_compare.png}
+  \caption{Baseline: SIR diffusion, real network vs ER vs BA.}
+  \label{fig:diff}
+\end{figure}
+
+\paragraph{Custom model.} For the manipulation task a bespoke, deterministic diffusion model is implemented from scratch in Python (not an NDlib stock model), based on a two-player coordination game~\cite{granovetter,kleinberg} played on every edge: each account chooses behaviour A or B and gains from matching its neighbours (payoff $a$ if both choose A, $b$ if both B, $0$ otherwise). A node $v$ adopts A iff the fraction of its A-neighbours is at least $q=b/(a+b)$; a seed set is hard-wired to A and the cascade is deterministic. The model is then made community-aware -- its ad-hoc, novel ingredient -- by exploiting the external semantic information (the Louvain labels): cross-community ties are down-weighted by a factor $\omega\in[0,1]$, so $v$ adopts A iff
+\[
+\frac{A_{\mathrm{in}} + \omega\,A_{\mathrm{out}}}{D_{\mathrm{in}} + \omega\,D_{\mathrm{out}}}\;\ge\;q,
+\]
+where $A_{\mathrm{in}}/A_{\mathrm{out}}$ ($D_{\mathrm{in}}/D_{\mathrm{out}}$) are the active (total) neighbours inside/outside $v$'s community. $\omega=1$ recovers the plain model; $\omega<1$ models homophilous coordination (accounts coordinate more readily with same-community peers). The model is analysed by varying both its parameters ($q$, $\omega$) and the initial conditions (the seed set).
+
+\paragraph{Seed placement vs.\ critical threshold.} At equal seed budget ($k=150$, $1\%$ of nodes), the largest threshold still yielding a global cascade ($q^{*}$) is $\approx0.05$ for random seeds, $\approx0.20$ for high-degree hubs and $\approx0.25$ for seeds concentrated in a single community (Figure~\ref{fig:game-thr}). Hubs trigger global adoption at $4$--$5\times$ higher thresholds: which nodes are activated matters far more than how many, linking the centrality analysis of Section~\ref{sec:analysis} to diffusion.
+
+\paragraph{Communities as barriers.} Seeding an entire community and increasing $q$, the spill-over into the other communities exhibits a sharp transition around $q\approx0.41$: it stays at $100\%$ for $q\le0.40$ but collapses to $<2\%$ at $q=0.45$, where the seeded community remains fully adopted while the others stay at $0$--$12\%$ (Figure~\ref{fig:game-bar}). This empirically confirms the theoretical result that a sufficiently dense cluster (density $>1-q$) halts a cascade: the topical communities of Section~\ref{sec:cd} act as diffusion barriers.
+
+\paragraph{Homophilous coordination.} Fixing $q=0.40$ and seeding one community, the custom weight $\omega$ has a striking effect (Figure~\ref{fig:game-omega}): with $\omega\ge0.9$ the cascade still floods the whole network ($100\%$ spill-over), but as soon as coordination becomes even slightly homophilous ($\omega\le0.8$) the spill-over collapses to $\approx3\%$ and the cascade is confined to the seeded community ($\sim$28\% of the network). A modest preference for same-community coordination is therefore enough to turn the community structure into a near-perfect barrier -- a behavioural counterpart to the topical echo chambers studied in Section~\ref{sec:open}.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{figures/game_threshold_seeding.png}
+  \caption{Custom cascade: final adoption vs.\ threshold $q$ for three seeding strategies (equal budget).}
+  \label{fig:game-thr}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{figures/game_community_barriers_detail.png}
+  \caption{Per-community adoption when seeding a single community at $q=0.45$: the cascade is confined to the seeded community (red).}
+  \label{fig:game-bar}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{figures/game_custom_omega.png}
+  \caption{Custom community-aware model: spill-over and total adoption as the cross-community coordination weight $\omega$ decreases (seeded community fixed, $q=0.40$).}
+  \label{fig:game-omega}
+\end{figure}

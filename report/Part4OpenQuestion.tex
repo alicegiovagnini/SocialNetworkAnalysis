@@ -1,0 +1,34 @@
+\section{Open Question}
+\label{sec:open}
+\subsection{Research question}
+Is the scientific community on Bluesky organised into topical echo chambers? Do the network communities correspond
+to coherent discussion topics, and are connected accounts more topically similar than unconnected ones (topical homophily)?
+
+\subsection{Method}
+SNA is combined with text mining, exploiting the post layer collected during crawling. Each node is turned into a document by concatenating its sampled posts ($\sim$271k posts over $\sim$14.6k active accounts); documents are vectorised with TF-IDF (3{,}000 terms, English plus platform stop-words). Then (i) the top TF-IDF terms per Louvain community are extracted to label its topic, and (ii) topical homophily is measured as the mean cosine similarity between the topic vectors of node pairs, contrasting same vs different community pairs and real edges vs non-edges.
+
+\subsection{Results}
+The communities map onto sharply distinct topics: politics/news (trump, news, iran), climate/energy (climate, energy, ocean), chemistry/biology (nature, cell, chemistry), neuroscience (brain, neuroscience),
+conservation/ecology (species, biodiversity, marine) and space (nasa, space, moon). Quantitatively, same-community pairs are $1.39\times$ more topically similar than cross-community pairs ($0.060$ vs $0.043$), and the endpoints of real follow edges are $1.79\times$ more similar than random non-edges ($0.084$ vs $0.047$). Both gaps are highly significant (one-sided Mann--Whitney $U$ test, $p<10^{-80}$ for communities and $p<10^{-200}$ for edges), and the full similarity distributions (Figure~\ref{fig:homophily}) display the same ordering.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]{figures/open_question_homophily.png}
+  \caption{Distributions of pairwise topic-vector cosine similarity (means marked): same- vs different-community pairs, and real-edge vs non-edge endpoints.}
+  \label{fig:homophily}
+\end{figure}
+
+\subsection{Interpretation}
+Both signals are consistent and significant in direction: the follow structure aligns with what accounts talk about, i.e.\ people preferentially follow others discussing similar topics, and network communities behave as topical clusters. This supports the existence of topical echo chambers within the scientific community, although the moderate magnitude of the ratios indicates permeable, overlapping chambers rather than fully isolated ones, in line with the cross-cutting role of journalistic and political accounts observed in Section~\ref{sec:analysis}.
+
+\section{Discussion}
+\label{sec:discussion}
+Read together, the analyses paint a coherent and self-reinforcing picture of the Bluesky scientific community. The structural findings of Section~\ref{sec:analysis} -- a heavy-tailed degree distribution and, above all, a clustering coefficient an order of magnitude above the ER baseline -- are not mere statistical curiosities: they are the topological signature of the community organisation that Section~\ref{sec:cd} then resolves into interpretable academic disciplines. The same excess of triangles that makes the network non-random is what allows Louvain and Infomap to recover meaningful partitions, and what the open question (Section~\ref{sec:open}) explains semantically: accounts cluster because they talk about and follow others on the same topics.
+
+Two cross-cutting themes stand out. First, the community is cohesive yet permeable. Topical homophily is clear but moderate ($1.8\times$), and the most central nodes are not pure science accounts but platform, journalistic and political hubs (\texttt{bsky.app}, \texttt{nytimes.com}, \texttt{aoc}) that bridge otherwise separate disciplines -- so the ``echo chambers'' are real but overlapping rather than sealed. Second, structure governs dynamics. On such a dense graph the epidemic models saturate almost regardless of topology, yet the custom coordination cascade reveals a sharper story: who seeds a behaviour matters far more than how many (hubs sustain global cascades at $4$--$5\times$ higher thresholds), and the very communities detected in Section~\ref{sec:cd} act as diffusion barriers once coordination becomes even slightly homophilous. The community structure is therefore not only descriptive but functional: it shapes how information, norms and behaviours can propagate through the scientific community.
+
+\section{Conclusions}
+A 15{,}000-node follow network of the Bluesky scientific community was built and analysed. The network is small-world and scale-free, with a clustering coefficient far above ER/BA baselines, revealing a strong community structure that Louvain and Infomap resolve into interpretable academic disciplines. Link prediction confirms that local, neighbourhood-based heuristics (Adamic--Adar, AUC $0.945$) outperform popularity-based ones, while diffusion simulations, on such a dense graph, saturate almost identically across real and synthetic topologies, the real network even peaking marginally lower due to its redundant intra-community edges. Finally, the open question provides evidence of moderate topical homophily: connected accounts are $1.8\times$ more topically similar than random pairs, suggesting permeable topical echo chambers.
+
+\subsection{Limitations}
+The sample reflects the seeds' neighbourhood, follow lists are truncated, and posts are a per-account sample; results should be read as characterising the crawled community, not the whole platform.

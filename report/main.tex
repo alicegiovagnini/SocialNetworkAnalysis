@@ -1,0 +1,57 @@
+\documentclass[sigchi]{acmart}
+
+\usepackage{float}
+
+\emergencystretch=3em
+
+\settopmatter{printacmref=false}     
+\setcopyright{none}                   
+\renewcommand\footnotetextcopyrightpermission[1]{}  
+
+\acmConference[SNA 2026]{Social Network Analysis}{2025/26}{University of Pisa, Italy}
+
+% Make cross-references (sections, figures, tables), citations and URLs
+% clickable and coloured.
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
+
+\begin{document}
+
+\title[Analysis of the Bluesky Social Network]{Analysis of the Bluesky Social Network:\\ Scientific Community}
+
+\author{Sara Biavasco}
+\email{s.biavasco1@studenti.unipi.it}
+\affiliation{\institution{Student ID: 660194}}
+
+\author{Alice Giovagnini}
+\email{a.giovagnini@studenti.unipi.it}
+\affiliation{\institution{Student ID: 659710}}
+
+\author{Maria Paula Pena Gamez}
+\email{m.penagamez@studenti.unipi.it}
+\affiliation{\institution{Student ID: 722114}}
+
+
+\renewcommand{\shortauthors}{Biavasco, Giovagnini, Pena Gamez}
+
+
+\begin{abstract}
+This work collects and analyses the follow network of the scientific community on Bluesky, a social platform built on the open AT Protocol. Starting from five thematic seed accounts, a snowball crawl yields a connected network of 15{,}000 nodes and 1.67M edges. The network is strongly small-world (average path length $2.23$) and exhibits a heavy-tailed degree distribution
+and a clustering coefficient an order of magnitude higher than comparable Erd\H{o}s--R\'enyi and Barab\'asi--Albert graphs, pointing to a marked community structure. Louvain and Infomap recover topically coherent communities (climate, neuroscience, chemistry, ecology, science journalism). Link prediction, epidemic diffusion, and an open question on topical echo chambers are further addressed, finding that connected accounts are $1.8\times$ more topically similar than random pairs. \footnote{Project repository:\\
+\url{https://github.com/sna-unipi/sna-final-project-2026-2026_biavasco_giovagnini_penagomez}}
+\end{abstract}
+
+\keywords{Social Network Analysis, Bluesky, scientific community, community detection,
+link prediction, diffusion}
+
+\maketitle
+
+\input{Part0Introduction}
+\input{Part1DataCollection}
+\input{Part2NetworkCharacterization}
+\input{Part3NetworkManipulationAndAnalysis}
+\input{Part4OpenQuestion}
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{biblio}
+
+\end{document}

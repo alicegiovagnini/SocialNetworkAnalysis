@@ -1,0 +1,57 @@
+\section{Data Collection}
+\label{sec:data}
+
+\subsection{Selected Data Sources}
+The network is built from Bluesky Social, a microblogging platform based on the open AT Protocol~\cite{atproto}. Its public read endpoints (\url{https://public.api.bsky.app}) are served from a cached, ``public-web'' API that requires no authentication, account or API key, which makes the collection free and fully reproducible. The network is modelled as follows:
+\begin{itemize}\itemsep0pt
+  \item Node: an account, identified by its DID (Decentralized Identifier), a persistent key that remains stable even when the user changes handle;
+  \item Edge: a directed follow relationship $u\!\to\!v$ (``$u$ follows $v$''). The relationship is binary, hence the graph is unweighted; for Part~2 its simple, undirected version is used, as required;
+  \item Node attributes: handle, display name, biography, number of followers/follows/posts, and account-creation date;
+  \item Additional layer: a sample of posts (text, timestamp, likes, reposts) supporting the textual and temporal analyses of Part~4.
+\end{itemize}
+All data were obtained through five read-only AT~Protocol endpoints: \texttt{searchActors} (seed discovery), \texttt{resolveHandle} (handle$\to$DID), \texttt{getFollows} (social graph), \texttt{getProfiles} (attributes) and \texttt{getAuthorFeed} (posts).
+
+\subsection{Seed selection}
+The crawl is seeded with five thematic ``hub'' accounts, chosen as follows. The account-search endpoint (\texttt{app.bsky.\allowbreak actor.\allowbreak searchActors}) was queried with the keyword \texttt{science}, obtaining 25 candidate accounts, and five of them were manually selected according to two criteria:
+\begin{itemize}
+    \item type diversity, to avoid starting from a single bubble, mixing organisations/media and individual communicators/aca\-demics;
+    \item thematic centrality, preferring recognisable accounts that follow many members of the scientific community, so that the snowball fans out into several sub-communities. 
+    \end{itemize}
+    The selected seeds are \texttt{science.org} (Science Magazine), \texttt{scifri} (Science Friday), \texttt{standupforscience} (the ``Stand Up for Science'' movement), \texttt{whysharksmatter} (marine biologist D.~Shiffman) and \texttt{carlbergstrom} (academic C.~T.~Bergstrom): three outlets/organisations and two individual communicators. For reproducibility, it is worth noting that this endpoint returns a stable ranking (re-running the query reproduces the same 25 results, with the five seeds at ranks 6, 7, 11, 18 and 19), unlike the platform's interactive search bar, which relies on a different, personalised type-ahead endpoint and therefore yields a different ordering.
+
+
+\subsection{Crawling procedure}
+Starting from the seeds (resolved to DIDs), the follow graph is explored by breadth-first search (snowball sampling) with a FIFO queue:
+\begin{enumerate}\itemsep0pt
+  \item a node $u$ is dequeued and its follow list is downloaded page by page (100 entries/page);
+  \item every observed follow $u\!\to\!v$ is always written to disk; in addition, $v$ becomes a new node and is enqueued iff it is not already present and the node budget is not yet exhausted;
+  \item $u$ is marked as processed and the loop continues until the queue is empty.
+\end{enumerate}
+Two parameters govern the process. The node budget is \texttt{MAX\_NODES}~$=15{,}000$: once reached, no new nodes are added, but the queue keeps being drained so that all edges internal to the collected set are still recorded (an exhaustive, induced-subgraph approach). The per-node follow budget is capped at $10$ pages, i.e.\ at most 1{,}000 follows per node, to bound the cost on mega-hubs. The crawler (Python, \texttt{requests}) paces requests at $\sim$10\,req/s and applies exponential backoff on HTTP~429/5xx responses, staying within the rate limits. Importantly, only outgoing follows are queried (\texttt{getFollows}); follower lists are never fetched, so an incoming edge to a node appears only when another collected node happens to follow it. The final network is the induced subgraph: from the raw edge dump only edges $u\!\to\!v$ whose endpoints are both among the 15{,}000 nodes are kept.
+
+\subsection{Attributes and post sample}
+Once the graph is built, node attributes are retrieved in batches of 25 (\texttt{getProfiles}) and, for every node, a sample of up to 20 posts is collected (\texttt{getAuthorFeed}), storing for each post its text, creation timestamp, like count and repost count. The post layer comprises 271{,}001 posts and covers 14{,}610 of the 15{,}000 accounts (97.4\%); the remaining $\sim$3\% are profiles with no public posts or accounts that became unavailable after the crawl.
+
+\subsection{Sample statistics}
+The final network (simple, undirected version) has 15{,}000 nodes and 1{,}665{,}495 edges; it consists of a single connected component (giant component covering 100\% of the nodes). The account-creation timeline also characterize the community temporally (Figure~\ref{fig:creation}): we can infer that adoption arrives in two waves: a first influx in mid-2023, when the platform opened more widely, and a sharp spike in November~2024 ($3{,}641$ accounts in that single month) matching the well-documented migration from X/Twitter.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{figures/account_creation.png}
+  \caption{Account-creation dates of the collected accounts (monthly)}
+  \label{fig:creation}
+\end{figure}
+
+\subsection{Data quality}
+Identifiers are clean (no malformed or duplicate DIDs) and the core attributes have no missing values; only the optional display name is empty for 424 accounts (2.8\%). One caveat concerns post timestamps: since \texttt{createdAt} is declared by the publishing client, a few records carry implausible dates (the field ranges back to 1975, before the platform existed). These outliers are negligible in number but are filtered out before any temporal analysis.
+
+\subsection{Choices and limitations}
+Several deliberate choices shape and bound the sample.
+\begin{itemize}
+    \item Seed dependence: the sample characterises the community around the seeds, not the whole platform, and the manual, heuristic seed choice influence the observed structure.
+    \item Follow truncation: capping follow lists at 1{,}000 entries truncates the most prolific accounts (e.g.\ \texttt{carlbergstrom} follows 2{,}624 accounts and \texttt{whysharksmatter} 1{,}539, of which only $\sim$1{,}000 are recorded), introducing a recency bias on such nodes.
+    \item Outgoing-only crawl: only follows are traversed, never followers, so in-degree reflects internal visibility rather than true popularity. 
+    \item Hard node cap: the 15{,}000-node boundary is fixed by the BFS traversal order, not by an organic frontier, so accounts discovered after the cap (even within the same community) are excluded. 
+    \item Unweighted edges and sampled posts: the follow relation is binary and the post layer is a per-account sample. 
+\end{itemize}
+All results should therefore be read as characterising the crawled scientific community, not the entire Bluesky platform.

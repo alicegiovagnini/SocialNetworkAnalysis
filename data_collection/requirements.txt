@@ -1,0 +1,11 @@
+requests>=2.31
+networkx>=3.2
+numpy>=1.26
+pandas>=2.1
+matplotlib>=3.8
+cdlib>=0.4
+ndlib>=5.1
+scikit-learn>=1.4
+infomap>=2.7
+leidenalg>=0.10
+wurlitzer>=3.0
