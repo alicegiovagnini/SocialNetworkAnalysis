@@ -1,7 +1,7 @@
 """
 PART 3 (MANIPULATION cluster) - Diffusion (NDlib).
 
-Simulates the diffusion models seen in class - SI, SIS, SIR and Threshold -
+Simulates the diffusion models - SI, SIS, SIR and Threshold -
 as required by the assignment, BOTH on the collected data AND on synthetic
 graphs (ER and BA) with (almost) the same number of nodes/edges. Analyses the
 results varying the model parameters and the initial conditions (infection seeds).
@@ -148,9 +148,7 @@ def main():
              "SIR (real network) - effect of the initial seed fraction",
              os.path.join(fig, "diffusion_sir_seeds.png"))
 
-    print("\n[diff] done. In the report, discuss: does the real network diffuse "
-          "faster than ER (because of hubs and high clustering)? How do peak "
-          "and speed change with beta and with the seeds?")
+    print("\n[diff] done.")
 
 
 if __name__ == "__main__":

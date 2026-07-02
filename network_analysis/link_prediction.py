@@ -125,7 +125,7 @@ def main():
         print(f"{name:26s} {auc:7.3f} {pk:10.3f}")
 
     print("\n[lp] AUC = prob. that a real edge scores higher than a non-edge "
-          "(0.5 = chance). In the report, discuss which predictor wins and why.")
+          "(0.5 = chance).")
 
 
 if __name__ == "__main__":

@@ -10,8 +10,7 @@ Research question:
 Combines SNA tools (community detection) with a textual analysis (TF-IDF) of
 the posts, exploiting the additional information collected during crawling, as
 encouraged by the assignment. In particular it links partition quality to an
-external data factor (homophily of node labels/topics), as suggested by the
-report guidelines.
+external data factor (homophily of node labels/topics).
 
 Pipeline:
   1. group the posts by author -> one "document" per node;
@@ -180,7 +179,7 @@ def main():
     plt.close()
     print(f"[oq] plot -> {out}")
 
-    print("\n[oq] Interpretation (to write in the report): if 'same community' "
+    print("\n[oq] Interpretation: if 'same community' "
           "and 'real edges' show markedly higher similarity, the follow network "
           "aligns structure and topics => evidence of topical echo chambers in "
           "the Bluesky scientific community.")

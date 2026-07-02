@@ -1,7 +1,7 @@
 """
 PART 3 (extension) - Game-theoretic cascade model (decision-based).
 
-Implements the model seen in class (Class 13, slides 21-24): a two-player
+Implements a two-player
 coordination game played on each edge. Each node chooses A or B; the payoff
 increases if it chooses like its neighbours. The decision rule reduces to a
 THRESHOLD:
@@ -15,7 +15,7 @@ topology, the outcome is unique (unlike the stochastic SI/SIS/SIR models).
 Experiments:
   1) critical threshold q* varying the seeding STRATEGY (random / hubs /
      a single community), at equal seed budget;
-  2) communities as BARRIERS to the cascade (slide 24): seeding the cascade
+  2) communities as BARRIERS to the cascade: seeding the cascade
      inside one community, how far does it break into the others?
 
 Produces in data/figures/:
@@ -229,7 +229,7 @@ def exp_community_barriers(adj, comm, fig_dir,
     """
     Seed an ENTIRE community and measure the "spill-over" into the others as q
     varies. At low q the cascade floods everything; as q grows it stays confined
-    to the seeded community -> dense communities act as barriers (slide 24).
+    to the seeded community -> dense communities act as barriers.
     """
     from collections import Counter, defaultdict
     sizes = Counter(comm.values())
@@ -340,10 +340,7 @@ def main():
     exp_community_barriers(adj, comm, fig_dir)
     exp_custom_homophily(adj, comm, fig_dir)
 
-    print("\n[game] done. For the report: (1) hubs trigger global cascades at "
-          "higher q than random seeds; (2) a dense community, once seeded, "
-          "struggles to break into the others -> communities act as barriers "
-          "(cluster of density > 1-q, slide 24).")
+    print("\n[game] done.")
 
 
 if __name__ == "__main__":
