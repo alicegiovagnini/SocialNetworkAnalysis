@@ -1,25 +1,28 @@
 """
 PART 3 (ANALYTICAL cluster) - Link Prediction.
 
-Follows the setup of Liben-Nowell & Kleinberg, "The link prediction problem
-for social networks" (CIKM 2003), required by the assignment:
+Follows Liben-Nowell & Kleinberg, "The link prediction problem for social
+networks" (CIKM 2003), required by the assignment:
 
   - the network is split into TRAIN (80% of edges) and TEST (20% of edges);
-  - on the train graph the classic unsupervised predictors are computed:
+  - on the TRAIN graph the classic unsupervised predictors are computed:
       * Common Neighbors
       * Jaccard Coefficient
       * Adamic-Adar
       * Preferential Attachment
-  - each predictor's ability to "recover" the test edges is evaluated
-    against a sample of non-edges (negatives), via AUC-ROC and precision@k.
-
-To stay tractable on a network with ~1.6M edges, the evaluation uses a
-balanced sample of positive pairs (test edges) and negative pairs (random
-non-edges). The sample size is configurable.
+  - accuracy is measured AS IN THE PAPER. The candidate pairs (the held-out
+    TEST edges as positives, plus many random non-edges as negatives, in a
+    strongly imbalanced 1:R setting that mimics the paper's realistic scenario
+    of few true links among many candidates) are RANKED by each predictor;
+    the top-n pairs are taken (n = number of positives) and the number of
+    correct predictions is counted. The headline figure, exactly as reported
+    in the paper, is the IMPROVEMENT FACTOR over a random predictor
+    (precision@n / base-rate). AUC-ROC is also reported as a complementary
+    modern metric.
 
 Usage:
     python link_prediction.py
-    python link_prediction.py --sample 20000
+    python link_prediction.py --pos 2000 --ratio 50
 """
 
 import os
@@ -88,16 +91,21 @@ PREDICTORS = {
 }
 
 
-def precision_at_k(scores, labels, k):
+def top_n_precision(scores, labels, n):
+    """Paper-style accuracy: rank the candidate pairs by decreasing score, take
+    the top n, and return how many of them are real (held-out) edges, together
+    with the resulting precision@n."""
     order = sorted(range(len(scores)), key=lambda i: scores[i], reverse=True)
-    topk = order[:k]
-    return sum(labels[i] for i in topk) / k
+    correct = sum(labels[i] for i in order[:n])
+    return correct, correct / n
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--sample", type=int, default=20000,
-                    help="n. positive pairs (and as many negatives) for the evaluation")
+    ap.add_argument("--pos", type=int, default=2000,
+                    help="n. positive pairs (held-out test edges) used in the ranking")
+    ap.add_argument("--ratio", type=int, default=50,
+                    help="n. random negatives per positive (imbalance, as in the paper)")
     args = ap.parse_args()
 
     data_dir = config.DATA_DIR
@@ -108,23 +116,31 @@ def main():
     print(f"[lp] train: {G_train.number_of_edges()} edges | "
           f"test: {len(test_edges)} edges")
 
-    # balanced positive/negative sample
-    n = min(args.sample, len(test_edges))
-    pos = random.sample(test_edges, n)
-    neg = sample_negatives(G, n, G.nodes())
+    # Imbalanced candidate set: n positives (held-out test edges) + ratio*n random
+    # negatives, mimicking the paper's realistic "few real links among many candidates".
+    n_pos = min(args.pos, len(test_edges))
+    n_neg = n_pos * args.ratio
+    pos = random.sample(test_edges, n_pos)
+    neg = sample_negatives(G, n_neg, G.nodes())
     pairs = pos + neg
-    labels = [1] * n + [0] * n
-    print(f"[lp] evaluation on {n} positives + {n} negatives")
+    labels = [1] * n_pos + [0] * n_neg
+    prevalence = n_pos / (n_pos + n_neg)      # a random predictor's precision@n
+    print(f"[lp] ranking {n_pos} positives + {n_neg} negatives (1:{args.ratio}); "
+          f"random-predictor precision@n = {prevalence:.4f}")
 
-    k = max(1, n // 10)   # precision@k with k = 10% of the positives
-    print(f"\n{'predictor':26s} {'AUC':>7s} {'P@'+str(k):>10s}")
+    print(f"\n{'predictor':26s} {'top-n':>7s} {'P@n':>7s} {'x random':>9s} {'AUC':>7s}")
     for name, fn in PREDICTORS.items():
         scores = fn(G_train, pairs)
+        correct, prec = top_n_precision(scores, labels, n_pos)
+        factor = prec / prevalence
         auc = roc_auc_score(labels, scores)
-        pk = precision_at_k(scores, labels, k)
-        print(f"{name:26s} {auc:7.3f} {pk:10.3f}")
+        print(f"{name:26s} {correct:7d} {prec:7.3f} {factor:8.1f}x {auc:7.3f}")
 
-    print("\n[lp] AUC = prob. that a real edge scores higher than a non-edge "
+    print(f"\n[lp] top-n precision = fraction of the {n_pos} top-ranked candidate "
+          "pairs that are real held-out edges;")
+    print("[lp] 'x random' = improvement factor over a random predictor "
+          f"(baseline precision@n = {prevalence:.4f}), as reported in the paper;")
+    print("[lp] AUC = prob. that a real edge scores higher than a non-edge "
           "(0.5 = chance).")
 
 
