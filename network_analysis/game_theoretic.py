@@ -1,10 +1,11 @@
 """
 PART 3 (extension) - Game-theoretic cascade model (decision-based).
 
-Implements a two-player
-coordination game played on each edge. Each node chooses A or B; the payoff
-increases if it chooses like its neighbours. The decision rule reduces to a
-THRESHOLD:
+Implements a two-player coordination game played on each edge, coded from
+scratch in Python (the "coded in Python" option allowed by the assignment for
+the custom-model task; NDlib is used for the SI/SIS/SIR/Threshold baseline in
+diffusion.py). Each node chooses A or B; the payoff increases if it chooses
+like its neighbours. The decision rule reduces to a THRESHOLD:
 
     a node v adopts A  <=>  (fraction of neighbours in A) >= q ,   with q = b/(a+b)
 
@@ -12,15 +13,26 @@ where a,b are the coordination-game payoffs. The cascade is DETERMINISTIC:
 given the early-adopter set S (hard-wired to A), the threshold q and the
 topology, the outcome is unique (unlike the stochastic SI/SIS/SIR models).
 
+The ad-hoc/novel ingredient is a COMMUNITY-AWARE variant that down-weights
+coordination across group boundaries by a factor omega in [0,1]. The grouping
+uses BOTH kinds of information required by the task:
+  - network TOPOLOGY: the Louvain community structure (Experiment 2);
+  - external SEMANTIC information: a topical label for each account derived from
+    the TEXT of its posts (TF-IDF + KMeans), i.e. genuine node-attached
+    semantic data collected during crawling (Experiment 3).
+
 Experiments:
   1) critical threshold q* varying the seeding STRATEGY (random / hubs /
      a single community), at equal seed budget;
   2) communities as BARRIERS to the cascade: seeding the cascade
-     inside one community, how far does it break into the others?
+     inside one Louvain community, how far does it break into the others?
+  3) custom SEMANTIC model: coordination weighted by topical (text-derived)
+     groups; vary the cross-topic weight omega AND the seeded group.
 
 Produces in data/figures/:
   - game_threshold_seeding.png   : cascade size vs q per seeding strategy;
-  - game_community_barriers.png  : adoption per community when seeding one.
+  - game_community_barriers.png  : adoption per community when seeding one;
+  - game_custom_omega.png        : topical spill-over vs omega, per seeded group.
 
 Usage:
     python game_theoretic.py
@@ -29,7 +41,9 @@ Usage:
 import os
 import csv
 import gzip
+import json
 import random
+import collections
 
 import matplotlib
 matplotlib.use("Agg")
@@ -41,7 +55,7 @@ random.seed(42)
 
 
 # --------------------------------------------------------------------------
-# Loading the network (adjacency list) and communities
+# Loading the network (adjacency list), communities and post texts
 # --------------------------------------------------------------------------
 def load_adjacency(data_dir):
     """Undirected network -> dict did -> set(neighbours)."""
@@ -69,6 +83,50 @@ def load_communities(data_dir):
         for r in csv.DictReader(f):
             comm[r["did"]] = r["louvain_community"]
     return comm
+
+
+def load_texts(data_dir):
+    """did -> concatenated text of its posts (external semantic information)."""
+    texts = collections.defaultdict(list)
+    path = os.path.join(data_dir, "posts_sample.jsonl")
+    with open(path, encoding="utf-8") as f:
+        for line in f:
+            r = json.loads(line)
+            if r.get("text"):
+                texts[r["author"]].append(r["text"])
+    return {did: " ".join(t) for did, t in texts.items()}
+
+
+def build_topic_labels(adj, data_dir, k_topics=10):
+    """Assign every account a TOPIC label derived from the TEXT of its posts:
+    this is genuine external semantic information (node-attached content), as
+    opposed to the topological Louvain communities. Pipeline: posts -> TF-IDF ->
+    KMeans topical clusters. Accounts with no sampled posts go in a residual
+    'unknown' group."""
+    from sklearn.feature_extraction.text import (TfidfVectorizer,
+                                                 ENGLISH_STOP_WORDS)
+    from sklearn.cluster import KMeans
+
+    texts = load_texts(data_dir)
+    dids = [d for d in adj if d in texts]          # accounts that have text
+    docs = [texts[d] for d in dids]
+
+    extra = {"bsky", "social", "com", "www", "org", "net", "http", "https",
+             "doi", "new", "just", "like", "people", "really", "today", "via",
+             "amp", "don", "ve", "ll", "twitter", "post", "thread"}
+    stop = list(ENGLISH_STOP_WORDS.union(extra))
+    vec = TfidfVectorizer(max_features=3000, stop_words=stop,
+                          min_df=5, token_pattern=r"[a-zA-Z]{3,}")
+    X = vec.fit_transform(docs)                    # L2-normalised topic vectors
+    km = KMeans(n_clusters=k_topics, random_state=42, n_init=10)
+    lab = km.fit_predict(X)
+
+    topic = {d: f"T{int(lab[i])}" for i, d in enumerate(dids)}
+    for d in adj:                                  # accounts without posts
+        topic.setdefault(d, "T_unknown")
+    print(f"[game] topic labels from post text: {len(dids)} accounts with posts, "
+          f"{k_topics} topical clusters (+ unknown residual)")
+    return topic
 
 
 # --------------------------------------------------------------------------
@@ -112,17 +170,18 @@ def cascade(adj, seeds, q):
 
 
 # --------------------------------------------------------------------------
-# Custom (ad-hoc) variant: COMMUNITY-AWARE coordination cascade.
-# This is the bespoke diffusion model required by the manipulation task: it
-# extends the plain cascade by exploiting the external semantic information
-# (Louvain communities). Cross-community ties carry a coordination weight
-# omega in [0,1], while intra-community ties carry weight 1. A node adopts A iff
+# Custom (ad-hoc) variant: GROUP-AWARE coordination cascade.
+# This is the bespoke diffusion model of the manipulation task: it extends the
+# plain cascade by down-weighting coordination across GROUP boundaries. The
+# group can be either the topological Louvain community or the semantic topical
+# label. Cross-group ties carry a coordination weight omega in [0,1], intra-group
+# ties carry weight 1. A node adopts A iff
 #     (A_in + omega*A_out) / (D_in + omega*D_out) >= q
 # where A_in/A_out (D_in/D_out) are the active (total) neighbours inside/outside
-# the node's community. omega=1 recovers the plain model; omega<1 models
-# homophilous coordination (people coordinate more with same-community peers).
+# the node's group. omega=1 recovers the plain model; omega<1 models homophilous
+# coordination (people coordinate more with same-group peers).
 # --------------------------------------------------------------------------
-def cascade_community_aware(adj, comm, seeds, q, omega):
+def cascade_community_aware(adj, group, seeds, q, omega):
     active = set(seeds)
     frontier = set()
     for s in seeds:
@@ -134,10 +193,10 @@ def cascade_community_aware(adj, comm, seeds, q, omega):
             nb = adj.get(v, ())
             if not nb:
                 continue
-            cv = comm.get(v)
+            gv = group.get(v)
             a_in = a_out = d_in = d_out = 0
             for w in nb:
-                same = (comm.get(w) == cv)
+                same = (group.get(w) == gv)
                 if same:
                     d_in += 1
                     if w in active:
@@ -291,34 +350,37 @@ def exp_community_barriers(adj, comm, fig_dir,
 
 
 # --------------------------------------------------------------------------
-# Experiment 3 (custom model): homophilous coordination weight omega.
-# Seed one community and vary the cross-community weight omega: how much does
-# the cascade spill over into the other communities?
+# Experiment 3 (custom SEMANTIC model): homophilous coordination weight omega
+# on TOPICAL groups derived from the accounts' post text (external semantic
+# information). Seed one topical group and vary omega; repeat for a second
+# seeded group (i.e. vary both the model parameter omega and the seeds).
 # --------------------------------------------------------------------------
-def exp_custom_homophily(adj, comm, fig_dir, q=0.40,
-                         omegas=(1.0, 0.9, 0.8, 0.75, 0.5, 0.25, 0.1)):
+def exp_custom_semantic(adj, topic, fig_dir, q=0.40,
+                        omegas=(1.0, 0.9, 0.8, 0.75, 0.5, 0.25, 0.1)):
     from collections import Counter
-    sizes = Counter(comm.values())
-    seed_comm = sizes.most_common(1)[0][0]
-    seeds = {n for n in adj if comm.get(n) == seed_comm}
-    others = len(adj) - len(seeds)
-
-    print(f"\n[E3] custom community-aware model: seed community #{seed_comm} "
-          f"({len(seeds)} nodes), q={q}, varying omega")
-    spill, total = [], []
-    for w in omegas:
-        final = cascade_community_aware(adj, comm, seeds, q, w)
-        spill.append(sum(1 for n in final if comm.get(n) != seed_comm) / others)
-        total.append(len(final) / len(adj))
-        print(f"   omega={w:<4}  spill-over={spill[-1]*100:5.1f}%  "
-              f"total adopters={total[-1]*100:5.1f}%")
+    sizes = Counter(topic.values())
+    # the two largest REAL topical groups (skip the 'unknown' residual)
+    ranked = [c for c, _ in sizes.most_common() if c != "T_unknown"]
+    groups = ranked[:2]
 
     plt.figure(figsize=(7, 5))
-    plt.plot(omegas, [s*100 for s in spill], marker="o", label="spill-over (other communities)")
-    plt.plot(omegas, [t*100 for t in total], marker="s", label="total adopters")
-    plt.xlabel("cross-community coordination weight  $\\omega$")
-    plt.ylabel("adopters (%)")
-    plt.title(f"Community-aware cascade: effect of homophilous coordination (q={q})")
+    for g in groups:
+        seeds = {n for n in adj if topic.get(n) == g}
+        others = len(adj) - len(seeds)
+        print(f"\n[E3] custom SEMANTIC model: seed topical group {g} "
+              f"({len(seeds)} accounts), q={q}, varying omega")
+        spill = []
+        for w in omegas:
+            final = cascade_community_aware(adj, topic, seeds, q, w)
+            s = sum(1 for n in final if topic.get(n) != g) / others
+            spill.append(s)
+            print(f"   omega={w:<4}  spill-over into other topics = {s*100:5.1f}%")
+        plt.plot(omegas, [s * 100 for s in spill], marker="o",
+                 label=f"seed topical group {g} (n={len(seeds)})")
+
+    plt.xlabel("cross-topic coordination weight  $\\omega$")
+    plt.ylabel("spill-over into the other topical groups (%)")
+    plt.title(f"Semantic community-aware cascade: homophilous coordination (q={q})")
     plt.gca().invert_xaxis()   # from standard (omega=1) to strongly homophilous
     plt.legend(); plt.grid(alpha=0.3); plt.tight_layout()
     out = os.path.join(fig_dir, "game_custom_omega.png")
@@ -331,14 +393,15 @@ def main():
     fig_dir = os.path.join(data_dir, "figures")
     os.makedirs(fig_dir, exist_ok=True)
 
-    print("[game] loading network and communities...")
+    print("[game] loading network, communities and post texts...")
     adj = load_adjacency(data_dir)
     comm = load_communities(data_dir)
     print(f"[game] network: {len(adj)} nodes; communities: {len(set(comm.values()))} (Louvain)")
+    topic = build_topic_labels(adj, data_dir)
 
-    exp_threshold_seeding(adj, comm, fig_dir)
-    exp_community_barriers(adj, comm, fig_dir)
-    exp_custom_homophily(adj, comm, fig_dir)
+    exp_threshold_seeding(adj, comm, fig_dir)      # topology + seeds
+    exp_community_barriers(adj, comm, fig_dir)     # topological community structure
+    exp_custom_semantic(adj, topic, fig_dir)       # external semantic info + omega + seeds
 
     print("\n[game] done.")
 

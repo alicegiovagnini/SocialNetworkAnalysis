@@ -1,10 +1,10 @@
 \section{Network Characterization}
 \label{sec:analysis}
 
-The analysis is carried out with NetworkX~\cite{networkx} on the simple, undirected and unweighted version of the network, and compared against an Erd\H{o}s--R\'enyi (ER) random graph and a Barab\'asi--Albert (BA) graph with (almost) the same number of nodes and edges.
+The analysis is carried out with NetworkX~\cite{networkx} on the simple, undirected and unweighted version of the network, and compared against an Erd\H{o}s--R\'enyi (ER) random graph and a Barab\'asi--Albert (BA) graph with (almost) the same number of nodes and edges. Static plots are produced in Python with Matplotlib, while the community-coloured network layout (Figure~\ref{fig:communities}) is produced with Gephi (ForceAtlas2).
 
 \subsection{Degree distribution}
-The average degree is $\approx 222$ while the maximum degree reaches $6556$: the distribution is strongly right-skewed, i.e.\ a few hubs coexist with many low-degree accounts. On the log-log CCDF (Figure~\ref{fig:degree}) the empirical curve features a heavy, approximately linear tail, close to the power-law behaviour of the BA model and clearly different from the sharply decaying, bell-shaped ER curve. This indicates that the network is (approximately) scale-free, as expected for a social follow graph dominated by a few highly visible accounts (outlets and prominent communicators).
+The average degree is $\approx 222$ while the maximum degree reaches $6556$: the distribution is strongly right-skewed, i.e.\ a few hubs coexist with many low-degree accounts. On the log-log CCDF (Figure~\ref{fig:degree}) the empirical curve features a heavy, approximately linear tail, close to the power-law behaviour of the BA model and clearly different from the sharply decaying, bell-shaped ER curve. This indicates that the network is approximately scale-free, as expected for a social follow graph dominated by a few highly visible accounts (outlets and prominent communicators).
 
 \begin{figure}[h]
   \centering
@@ -20,7 +20,7 @@ The network has a single connected component covering 100\% of the nodes: the sn
 The network is sparse in absolute terms (density $0.0148$) yet strongly clustered: the average clustering coefficient is $0.238$ and the global transitivity $0.127$. Crucially, the empirical clustering is about $16\times$ that of an ER graph of identical density ($0.0148$) and $5\times$ that of a degree-comparable BA graph ($0.0456$), see Table~\ref{tab:compare}. Such a strong tendency toward triangle closure is a hallmark of
 community structure and cannot be explained by either random wiring (ER) or pure preferential attachment (BA); it motivates the community detection of Section~\ref{sec:cd}.
 
-\begin{table}[H]
+\begin{table}[h]
   \centering\small
   \caption{Bluesky vs synthetic graphs (same order of nodes/edges).}
   \label{tab:compare}
@@ -46,7 +46,7 @@ community structure and cannot be explained by either random wiring (ER) or pure
 The degree assortativity coefficient is slightly negative ($-0.07$), so the network is mildly disassortative: high-degree hubs tend to be followed by many low-degree accounts rather than by other hubs, a pattern typical of follow graphs centred on a few highly visible accounts. Mixing by community, in contrast, is strongly positive: the attribute assortativity computed on the Louvain labels is $0.52$, and $59.8\%$ of all edges fall within a single community. Connections are therefore organised far more by topic than by popularity, which quantitatively reinforces the community structure discussed in Section~\ref{sec:cd}.
 
 \subsection{Path analysis}
-Estimated on the giant component via sampled BFS, the average shortest-path length is $\approx 2.23$ and the diameter (lower bound) is $\approx 4$. Despite 15{,}000 nodes, any two accounts are on average little more than two hops apart: the network is markedly small-world. The figure is close to the analytical ER estimate $\ln n / \ln \langle k\rangle \approx 1.8$, confirming that the high density and the hubs produce very short paths -- a structural prerequisite for fast information diffusion (Section~\ref{sec:part3}).
+Estimated on the giant component via sampled BFS, the average shortest-path length is $\approx 2.23$ and the diameter (lower bound) is $\approx 4$. Despite 15{,}000 nodes, any two accounts are on average little more than two hops apart: the network is markedly small-world. The figure is close to the analytical ER estimate $\ln n / \ln \langle k\rangle \approx 1.8$, confirming that the high density and the hubs produce very short paths, a structural prerequisite for fast information diffusion (Section~\ref{sec:part3}).
 
 \subsection{Centrality analysis}
 Degree, betweenness (sampled), PageRank and eigenvector centrality largely agree on the top accounts (Table~\ref{tab:centrality}). The platform account \texttt{bsky.app} dominates every ranking, and overwhelmingly so for betweenness ($0.158$ vs $0.019$ for the runner-up), because almost every user follows it: it behaves as a global, non-thematic hub and could legitimately be treated as an outlier and removed. Below it appear the seed accounts (\texttt{carlbergstrom}, \texttt{science.org}, \texttt{standupforscience}) together with science journalists and outlets (\texttt{edyong209}, \texttt{nytimes.com}, \texttt{nature}). Notably, \texttt{science.org} climbs in the betweenness ranking, signalling a bridging role between otherwise separated thematic communities. The recurrence of political (\texttt{aoc}) and journalistic accounts among the most central nodes already hints at the overlap between science, journalism and politics on the platform.
@@ -56,7 +56,7 @@ Degree, betweenness (sampled), PageRank and eigenvector centrality largely agree
 The first comparison is drawn against an Erd\H{o}s--R\'enyi random graph $G(n,m)$ with the same number of nodes and edges (Table~\ref{tab:compare}). The two differ on every structural axis. The ER degree sequence concentrates around the mean in a bell-shaped curve, whereas the empirical distribution has a heavy, approximately linear tail (Figure~\ref{fig:degree}). The decisive gap, however, is clustering: the empirical average clustering ($0.238$) is about $16\times$ that of ER at identical density ($0.0148$), with the same order-of-magnitude ratio for transitivity. Random wiring cannot generate the observed density of triangles, so the network is far from random.
 
 \subsection{Comparison with BA}
-The network is then compared with a Barab\'asi--Albert graph of comparable size, grown by preferential attachment (Table~\ref{tab:compare}). Here the agreement is only partial. BA reproduces the heavy degree tail -- both networks are approximately scale-free -- which is consistent with a follow graph dominated by a few highly visible hubs (outlets and prominent communicators). Yet BA still falls short on clustering: its average clustering ($0.0456$) is about five times lower than the empirical one, because pure preferential attachment closes few triangles. In sum, neither a purely random (ER) nor a purely preferential-attachment (BA) mechanism reproduces the observed triangle density: the excess clustering is the structural fingerprint of the community organisation analysed next.
+The network is then compared with a Barab\'asi--Albert graph of comparable size, grown by preferential attachment (Table~\ref{tab:compare}). Here the agreement is only partial. BA reproduces the heavy degree tail, both networks are approximately scale-free, which is consistent with a follow graph dominated by a few highly visible hubs (outlets and prominent communicators). Yet BA still falls short on clustering: its average clustering ($0.0456$) is about five times lower than the empirical one, because pure preferential attachment closes few triangles. In sum, neither a purely random (ER) nor a purely preferential-attachment (BA) mechanism reproduces the observed triangle density: the excess clustering is the structural fingerprint of the community organisation analysed next.
 
 \begin{table}[h]
   \centering\small
@@ -97,7 +97,7 @@ The modular structure is identified and evaluated with three CDlib~\cite{cdlib} 
 
 \subsection{Quality}
 Louvain yields the best partition (9 communities, modularity $0.428$). Infomap fragments the graph into 21 finer communities
-(plus one large residual cluster), with lower modularity. Label Propagation collapses the entire network into a single community (modularity $0$): on dense graphs with no clear sparse cuts LP is known to percolate a single label -- a meaningful negative result rather than a bug.
+(plus one large residual cluster), with lower modularity. Label Propagation collapses the entire network into a single community (modularity $0$): on dense graphs with no clear sparse cuts LP is known to percolate a single label, a meaningful negative result rather than a bug.
 
 \subsection{Agreement}
 NMI/ARI confirm the picture: Louvain vs Infomap show moderate agreement (NMI $=0.455$, ARI $=0.200$), they capture the same
@@ -115,7 +115,7 @@ the most frequent keywords per community are extracted. The Louvain communities 
 \end{figure}
 
 \subsection{Communities and the migration waves}
-Combining the community labels with the account-creation dates (Section~\ref{sec:data}) shows that the two adoption waves of Figure~\ref{fig:creation} carry different disciplinary mixes (Figure~\ref{fig:cohorts}). The 2023 founding cohort is dominated by politics/news ($31\%$), followed by neuroscience ($15\%$) and climate/energy ($14\%$). The November-2024 migration cohort -- the post-election exodus from X -- is markedly more scientific: chemistry/biology more than doubles its share ($10\%\to20\%$) and conservation/ecology grows, while politics/news ($31\%\to24\%$), neuroscience and space recede. The later wave therefore did not amplify the political core but diversified the platform toward the natural sciences -- a non-obvious effect that the static network alone would not reveal.
+Combining the community labels with the account-creation dates (Section~\ref{sec:data}) shows that the two adoption waves of Figure~\ref{fig:creation} carry different disciplinary mixes (Figure~\ref{fig:cohorts}). The 2023 founding cohort is dominated by politics/news ($31\%$), followed by neuroscience ($15\%$) and climate/energy ($14\%$). The November-2024 migration cohort, the post-election exodus from X, is markedly more scientific: chemistry/biology more than doubles its share ($10\%\to20\%$) and conservation/ecology grows, while politics/news ($31\%\to24\%$), neuroscience and space recede. The later wave therefore did not amplify the political core but diversified the platform toward the natural sciences, a non-obvious effect that the static network alone would not reveal.
 
 \begin{figure}[h]
   \centering

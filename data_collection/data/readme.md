@@ -22,9 +22,15 @@ with gzip.open("network_undirected.edgelist.gz", "rt") as f:
 | `node_attributes.csv` | CSV | 1.6 MB | Node attribute table (decompressed copy). |
 | `node_attributes.csv.gz` | gzip CSV | 0.8 MB | Same table, compressed. |
 | `communities.csv` | CSV | 0.5 MB | Louvain community per node. |
-| `network_undirected.edgelist.gz` | gzip | 28 MB | **Simple, undirected, unweighted** network — Part 2. |
-| `network_directed.edgelist.gz` | gzip | 32 MB | Directed follow network (`u → v`). |
-| `posts_sample.jsonl.gz` | gzip JSONL | 34 MB | Posts per node (text + timestamps). |
+| `network_undirected.edgelist.gz` | gzip | 27 MB | **Simple, undirected, unweighted** network — Part 2. |
+| `network_directed.edgelist.gz` | gzip | 31 MB | Directed follow network (`u → v`). |
+| `posts_sample.jsonl.gz` | gzip JSONL | 33 MB | Posts per node (text + timestamps). |
+| `network_viz.gexf` | GEXF | 3.5 MB | Community-stratified ~2k-node sample for Gephi (from `export_gephi.py`). |
+| `figures/` | PNG | <1 MB | All figures produced by the analysis scripts (Parts 2–4). |
+
+`network_full.gexf` (the full 15k-node network in GEXF, ~181 MB) is also
+written by `export_gephi.py` but exceeds GitHub's file-size limit: it stays
+local and is re-creatable by re-running the script.
 
 ## Schemas
 
@@ -43,4 +49,6 @@ undirected file lists each edge once; the directed file keeps the follow directi
 
 - Nodes are keyed by **DID** (stable across handle renames) — the safe join key.
 - Intermediate crawl files (`nodes.json`, `raw_edges.jsonl`, `crawl_state.pkl`, …)
-  are not needed for the analyses and are not committed.
+  and the uncompressed copies (`node_attributes.json`, `posts_sample.jsonl`) are
+  not committed (gitignored) — they are re-creatable from the pipeline / the
+  `.gz` files.

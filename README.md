@@ -34,11 +34,15 @@ the project.
 ├── network_analysis/     # Part 2 & Part 3
 │   ├── analysis_starter.py    # Part 2: stats, degree dist, ER/BA, centrality
 │   ├── community_detection.py # Louvain / Label Propagation / Infomap (CDlib)
+│   ├── export_gephi.py        # GEXF export for the Gephi visualisation
+│   ├── temporal_analysis.py   # account-creation waves & cohort composition
 │   ├── link_prediction.py     # Part 3 (analytical): CN/Jaccard/AA/PA
 │   ├── diffusion.py           # Part 3 (manipulation): SI/SIS/SIR/Threshold
-│   └── game_theoretic.py      # extension: coordination-game cascade
+│   ├── game_theoretic.py      # Part 3 (custom): coordination-game cascade
+│   └── plots/                 # figures used in the report (Parts 2–3)
 ├── open_problem/         # Part 4 — open question
-│   └── open_question.py  #   topical echo chambers (TF-IDF + communities)
+│   ├── open_question.py  #   topical echo chambers (TF-IDF + communities)
+│   └── plots/            #   figures used in the report (Part 4)
 ├── report/               # Part 5 — report (ACM template, acmart)
 │   └── main.tex          #   compile on Overleaf (pdfLaTeX + BibTeX)
 ├── README.md
@@ -65,10 +69,12 @@ The **final, compressed data** is in `data_collection/data/`:
 | `node_attributes.csv.gz`         | node attribute table |
 | `posts_sample.jsonl.gz`          | sampled posts (text + timestamps) |
 | `communities.csv`                | Louvain community of each node |
+| `network_viz.gexf`               | stratified sample for Gephi (ForceAtlas2) |
+| `figures/`                       | all figures produced by the analyses |
 
 Heavy intermediate files (`raw_edges.jsonl`, uncompressed edgelists, the raw
-post dump, crawl checkpoint…) are **not** versioned — they are re-creatable by
-running the scripts (see `.gitignore`).
+post dump, crawl checkpoint, the full-network `network_full.gexf`…) are **not**
+versioned — they are re-creatable by running the scripts (see `.gitignore`).
 
 ## How to run
 
@@ -88,11 +94,16 @@ python build_network.py             # final network + stats + .gz exports
 ```bash
 python network_analysis/analysis_starter.py     # Part 2
 python network_analysis/community_detection.py  # community detection
+python network_analysis/export_gephi.py         # GEXF export for Gephi
+python network_analysis/temporal_analysis.py    # temporal analysis
 python network_analysis/link_prediction.py      # Part 3 (analytical)
 python network_analysis/diffusion.py            # Part 3 (manipulation)
-python network_analysis/game_theoretic.py       # extension (cascade)
+python network_analysis/game_theoretic.py       # Part 3 (custom cascade)
 python open_problem/open_question.py            # Part 4
 ```
+
+Figures are written to `data_collection/data/figures/`; the ones used in the
+report are also kept in `network_analysis/plots/` and `open_problem/plots/`.
 
 ## Report
 

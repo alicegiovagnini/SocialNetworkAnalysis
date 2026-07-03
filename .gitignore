@@ -131,6 +131,8 @@ dmypy.json
 # ---- Project-specific (added for submission) ----
 # macOS
 .DS_Store
+# IDE
+.idea/
 # Temporary crawler PID files
 *_pid
 # Redundant archives
@@ -145,3 +147,5 @@ posts_sample.csv
 node_attributes.json
 nodes.json
 crawl_state.pkl
+# Full-network GEXF (~181 MB, over GitHub's 100 MB limit; re-run export_gephi.py)
+network_full.gexf
