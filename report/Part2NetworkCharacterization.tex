@@ -49,7 +49,7 @@ The degree assortativity coefficient is slightly negative ($-0.07$), so the netw
 Estimated on the giant component via sampled BFS, the average shortest-path length is $\approx 2.23$ and the diameter (lower bound) is $\approx 4$. Despite 15{,}000 nodes, any two accounts are on average little more than two hops apart: the network is markedly small-world. The figure is close to the analytical ER estimate $\ln n / \ln \langle k\rangle \approx 1.8$, confirming that the high density and the hubs produce very short paths, a structural prerequisite for fast information diffusion (Section~\ref{sec:part3}).
 
 \subsection{Centrality analysis}
-Degree, betweenness (sampled), PageRank and eigenvector centrality largely agree on the top accounts (Table~\ref{tab:centrality}). The platform account \texttt{bsky.app} dominates every ranking, and overwhelmingly so for betweenness ($0.158$ vs $0.019$ for the runner-up), because almost every user follows it: it behaves as a global, non-thematic hub and could legitimately be treated as an outlier and removed. Below it appear the seed accounts (\texttt{carlbergstrom}, \texttt{science.org}, \texttt{standupforscience}) together with science journalists and outlets (\texttt{edyong209}, \texttt{nytimes.com}, \texttt{nature}). Notably, \texttt{science.org} climbs in the betweenness ranking, signalling a bridging role between otherwise separated thematic communities. The recurrence of political (\texttt{aoc}) and journalistic accounts among the most central nodes already hints at the overlap between science, journalism and politics on the platform.
+Degree, betweenness (sampled), PageRank and eigenvector centrality largely agree on the top accounts (Table~\ref{tab:centrality}), the main exception being eigenvector centrality, which -- rewarding ties to other central nodes rather than raw popularity -- ranks the political hub \texttt{aoc} first and elevates journalism accounts such as \texttt{jamellebouie}. The platform account \texttt{bsky.app} tops the degree, betweenness and PageRank rankings, and overwhelmingly so for betweenness ($0.158$ vs $0.019$ for the runner-up), because almost every user follows it: it behaves as a global, non-thematic hub and could legitimately be treated as an outlier and removed. Below it appear the seed accounts (\texttt{carlbergstrom}, \texttt{science.org}, \texttt{standupforscience}) together with science journalists and outlets (\texttt{edyong209}, \texttt{nytimes.com}, \texttt{nature}). Notably, \texttt{science.org} climbs in the betweenness ranking, signalling a bridging role between otherwise separated thematic communities. The recurrence of political (\texttt{aoc}) and journalistic accounts among the most central nodes already hints at the overlap between science, journalism and politics on the platform.
 
 
 \subsection{Comparison with ER}
@@ -59,18 +59,19 @@ The first comparison is drawn against an Erd\H{o}s--R\'enyi random graph $G(n,m)
 The network is then compared with a Barab\'asi--Albert graph of comparable size, grown by preferential attachment (Table~\ref{tab:compare}). Here the agreement is only partial. BA reproduces the heavy degree tail, both networks are approximately scale-free, which is consistent with a follow graph dominated by a few highly visible hubs (outlets and prominent communicators). Yet BA still falls short on clustering: its average clustering ($0.0456$) is about five times lower than the empirical one, because pure preferential attachment closes few triangles. In sum, neither a purely random (ER) nor a purely preferential-attachment (BA) mechanism reproduces the observed triangle density: the excess clustering is the structural fingerprint of the community organisation analysed next.
 
 \begin{table}[h]
-  \centering\small
+  \centering\footnotesize
+  \setlength{\tabcolsep}{3pt}
   \caption{Most central accounts (top-5 per measure).}
   \label{tab:centrality}
-  \begin{tabular}{lll}
+  \begin{tabular}{llll}
     \toprule
-    Degree & Betweenness & PageRank \\
+    Degree & Betweenness & PageRank & Eigenvector \\
     \midrule
-    \texttt{bsky.app}      & \texttt{bsky.app}      & \texttt{bsky.app} \\
-    \texttt{aoc}           & \texttt{carlbergstrom} & \texttt{aoc} \\
-    \texttt{carlbergstrom} & \texttt{aoc}           & \texttt{carlbergstrom} \\
-    \texttt{edyong209}     & \texttt{edyong209}     & \texttt{edyong209} \\
-    \texttt{nytimes.com}   & \texttt{science.org}   & \texttt{nytimes.com} \\
+    \texttt{bsky.app}      & \texttt{bsky.app}      & \texttt{bsky.app}      & \texttt{aoc} \\
+    \texttt{aoc}           & \texttt{carlbergstrom} & \texttt{aoc}           & \texttt{bsky.app} \\
+    \texttt{carlbergstrom} & \texttt{aoc}           & \texttt{carlbergstrom} & \texttt{jamellebouie} \\
+    \texttt{edyong209}     & \texttt{edyong209}     & \texttt{edyong209}     & \texttt{edyong209} \\
+    \texttt{nytimes.com}   & \texttt{science.org}   & \texttt{nytimes.com}   & \texttt{carlbergstrom} \\
     \bottomrule
   \end{tabular}
 \end{table}

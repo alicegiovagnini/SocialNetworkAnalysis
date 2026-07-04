@@ -25,6 +25,9 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
+import sys
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                "..", "data_collection"))
 import config
 
 # Louvain community id -> topic (from the TF-IDF keyword analysis).

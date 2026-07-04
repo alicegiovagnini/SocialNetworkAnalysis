@@ -27,6 +27,9 @@ import matplotlib.pyplot as plt
 import ndlib.models.epidemics as ep
 from ndlib.models.ModelConfig import Configuration
 
+import sys
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                "..", "data_collection"))
 import config
 
 ITERS = 100

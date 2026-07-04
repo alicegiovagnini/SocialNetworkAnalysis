@@ -48,6 +48,10 @@ undirected file lists each edge once; the directed file keeps the follow directi
 ## Notes
 
 - Nodes are keyed by **DID** (stable across handle renames) — the safe join key.
+- **Louvain is a stochastic heuristic**: re-running `community_detection.py`
+  yields a slightly different (but structurally equivalent) partition.
+  `communities.csv` is the **frozen partition** all the results reported in the
+  report refer to.
 - Intermediate crawl files (`nodes.json`, `raw_edges.jsonl`, `crawl_state.pkl`, …)
   and the uncompressed copies (`node_attributes.json`, `posts_sample.jsonl`) are
   not committed (gitignored) — they are re-creatable from the pipeline / the

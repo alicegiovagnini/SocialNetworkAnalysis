@@ -32,6 +32,9 @@ import re
 import networkx as nx
 from cdlib import algorithms, evaluation
 
+import sys
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                "..", "data_collection"))
 import config
 
 # Stopwords filtered out of the bios (English + Italian, plus platform tokens).

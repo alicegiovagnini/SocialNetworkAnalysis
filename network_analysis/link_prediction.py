@@ -33,6 +33,9 @@ import argparse
 import networkx as nx
 from sklearn.metrics import roc_auc_score
 
+import sys
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                "..", "data_collection"))
 import config
 
 random.seed(42)

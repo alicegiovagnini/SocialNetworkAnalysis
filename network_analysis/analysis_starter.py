@@ -32,6 +32,9 @@ import matplotlib
 matplotlib.use("Agg")  # non-interactive backend: save to file
 import matplotlib.pyplot as plt
 
+import sys
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                "..", "data_collection"))
 import config
 
 random.seed(42)

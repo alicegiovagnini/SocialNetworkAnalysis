@@ -49,6 +49,9 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
+import sys
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                "..", "data_collection"))
 import config
 
 random.seed(42)
@@ -89,7 +92,11 @@ def load_texts(data_dir):
     """did -> concatenated text of its posts (external semantic information)."""
     texts = collections.defaultdict(list)
     path = os.path.join(data_dir, "posts_sample.jsonl")
-    with open(path, encoding="utf-8") as f:
+    if os.path.exists(path):
+        fh = open(path, encoding="utf-8")
+    else:
+        fh = gzip.open(path + ".gz", "rt", encoding="utf-8")
+    with fh as f:
         for line in f:
             r = json.loads(line)
             if r.get("text"):

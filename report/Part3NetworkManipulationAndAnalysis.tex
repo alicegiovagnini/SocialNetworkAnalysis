@@ -42,6 +42,16 @@ As a reference, the standard SI, SIS, SIR and Threshold models are first simulat
   \label{fig:diff}
 \end{figure}
 
+The assignment's requirement to vary both model parameters and initial conditions is made explicit on the SIR model (Figure~\ref{fig:sir-param}). Raising the infection rate $\beta$ from $0.002$ to $0.02$ makes the epidemic peak higher and much earlier (from $\approx0.77$ around iteration~20 to $\approx0.93$ around iteration~6), yet all curves converge to the same tail: on this dense, small-world graph $\beta$ governs the \emph{speed} of the outbreak, not its final size. The initial seed fraction, by contrast, is almost irrelevant, varying it from $1\%$ to $20\%$ of the nodes leaves the SIR trajectory practically unchanged (only the first few iterations differ). This is the sharpest contrast with the custom cascade below (Figure~\ref{fig:game-thr}): for a simple contagion on a dense graph \emph{how many} seeds hardly matters, whereas for the coordination cascade \emph{which} nodes are seeded is decisive.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.49\linewidth]{figures/diffusion_sir_beta.png}\hfill
+  \includegraphics[width=0.49\linewidth]{figures/diffusion_sir_seeds.png}
+  \caption{Baseline SIR on the real network. Left: varying the infection rate $\beta$ raises and anticipates the peak but leaves the final size unchanged. Right: varying the initial seed fraction ($1$--$20\%$) barely affects the trajectory.}
+  \label{fig:sir-param}
+\end{figure}
+
 \subsection{Custom model}
 For the manipulation task a bespoke, deterministic diffusion model is implemented from scratch in Python, the ``coded in Python'' option the assignment allows for the custom model, NDlib being used only for the baseline above, based on a two-player coordination game~\cite{granovetter,kleinberg} played on every edge: each account chooses behaviour A or B and gains from matching its neighbours (payoff $a$ if both choose A, $b$ if both B, $0$ otherwise). A node $v$ adopts A iff the fraction of its A-neighbours is at least $q=b/(a+b)$; a seed set is hard-wired to A and the cascade is deterministic. The model is then made group-aware, its ad-hoc, novel ingredient, by down-weighting coordination across group boundaries by a factor $\omega\in[0,1]$, so $v$ adopts A iff
 \[
