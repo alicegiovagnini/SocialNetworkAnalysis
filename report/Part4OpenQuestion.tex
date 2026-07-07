@@ -12,7 +12,7 @@ Is the scientific community on Bluesky organized into topical echo chambers? Con
 SNA is combined with text mining, exploiting the post layer collected during crawling. Each node is turned into a document by concatenating its sampled posts ($\sim$271k posts over $14{,}598$ active accounts); documents are vectorized with TF-IDF (3{,}000 terms, English plus platform stop-words). Four analyses follow.
 \begin{enumerate}
 \item The top TF-IDF terms per Louvain community label its topic. \item To quantify how far a follow-community is a topic, the documents are independently clustered into topical groups (KMeans, one cluster per Louvain community) and the two partitions are compared via Normalized Mutual Information (NMI) and the Adjusted Rand Index (ARI).
-\item Topical homophily is measured as the mean cosine similarity between topic vectors, contrasting same vs different community pairs and real edges vs non-edges, with a one-sided Mann--Whitney test; the edge comparison is also checked against a degree-preserving configuration-model null (script \texttt{open\_question\_null.py}).
+\item Topical homophily is measured as the mean cosine similarity between topic vectors, contrasting same vs different community pairs and real edges vs non-edges, with a one-sided Mann--Whitney test; the edge comparison is also checked against a degree-preserving configuration-model null.
 \item The echo chamber is tracked over time by splitting accounts into creation-year cohorts (2023/2024/2025) and measuring, within each, the topical homophily of the internal follow edges (edge similarity relative to random within-cohort pairs).
 \end{enumerate}
 
