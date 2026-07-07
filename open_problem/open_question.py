@@ -134,7 +134,7 @@ def main():
     by_comm = collections.defaultdict(list)
     for d in dids:
         by_comm[comm[d]].append(idx[d])
-    big = sorted(by_comm.items(), key=lambda kv: len(kv[1]), reverse=True)[:6]
+    big = sorted(by_comm.items(), key=lambda kv: len(kv[1]), reverse=True)[:7]
     topic_kw = {}
     print("\nCOMMUNITY TOPICS (top TF-IDF words)")
     for cid, rows in big:
@@ -159,13 +159,20 @@ def main():
     # --- (1b) echo-chamber STRENGTH per community (intra-topical cohesion) ---
     print("\nECHO-CHAMBER STRENGTH per community (mean intra-community similarity)")
     cohesion = {}
-    for cid, rows in big:
+    for i, (cid, rows) in enumerate(big):
+        if i == 6:
+            # freeze the RNG before the 7th community so its extra sampling does
+            # not shift the downstream homophily/temporal draws (keeps them
+            # identical to the 6-community baseline)
+            _rng_state = random.getstate()
         s = []
         for _ in range(3000):
             a, b = random.choice(rows), random.choice(rows)
             if a != b:
                 s.append(float(X[a].multiply(X[b]).sum()))
         cohesion[cid] = float(np.mean(s))
+    if len(big) > 6:
+        random.setstate(_rng_state)
     for cid in sorted(cohesion, key=cohesion.get, reverse=True):
         print(f"  community {cid} ({topic_kw.get(cid, '')}): {cohesion[cid]:.4f}")
 
