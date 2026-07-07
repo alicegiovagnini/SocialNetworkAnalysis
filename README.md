@@ -10,7 +10,7 @@ M.Sc. in Data Science and Business Informatics, A.Y. 2025/2026.
 
 ## Overview
 
-We build and analyse the **follow network of the scientific community on
+We built and analysed the **follow network of the scientific community on
 Bluesky** (a platform based on the open *AT Protocol*). Starting from five
 thematic seed accounts, a snowball/BFS crawl over the public read endpoints
 produces a connected network of **15,000 nodes** and **~1.67M edges**, enriched
@@ -104,7 +104,7 @@ python open_problem/open_question.py            # Part 4
 python open_problem/open_question_null.py       # Part 4 (degree-preserving control)
 ```
 
-Figures are written to `data_collection/data/figures/`; the ones used in the
+Figures are uploaded to `data_collection/data/figures/`; the ones used in the
 report are also kept in `network_analysis/plots/` and `open_problem/plots/`.
 
 ## Report
