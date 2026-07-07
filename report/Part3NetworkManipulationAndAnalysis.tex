@@ -59,15 +59,9 @@ For the manipulation task a bespoke, deterministic diffusion model is implemente
 \]
 where $A_{\mathrm{in}}/A_{\mathrm{out}}$ ($D_{\mathrm{in}}/D_{\mathrm{out}}$) are the active (total) neighbors inside/outside $v$'s group. $\omega=1$ recovers the plain model; $\omega<1$ models homophilous coordination (accounts coordinate more readily with same-group peers). The grouping deliberately exploits both kinds of information the task calls for: network topology, the Louvain community structure (barriers experiment), and genuine external semantic information, a topical label attached to each of the $14{,}598$ accounts with posts, obtained by TF-IDF vectorizing the text of their posts and KMeans-clustering them into ten topical groups (semantic experiment). The model is analyzed by varying both its parameters ($q$, $\omega$) and the initial conditions (the seed set).
 
+
 \subsection{Seed placement vs.\ critical threshold}
 At equal seed budget ($k=150$, $1\%$ of nodes), the largest threshold still yielding a global cascade ($q^{*}$) is $\approx0.05$ for random seeds, $\approx0.20$ for high-degree hubs and $\approx0.25$ for seeds concentrated in a single community (Figure~\ref{fig:game-thr}). Hubs trigger global adoption at $4$--$5\times$ higher thresholds: which nodes are activated matters far more than how many, linking the centrality analysis of Section~\ref{sec:analysis} to diffusion.
-
-\subsection{Communities as barriers}
-Seeding an entire community and increasing $q$, the spill-over into the other communities exhibits a sharp transition around $q\approx0.41$: it stays at $100\%$ for $q\le0.40$ but collapses to $<2\%$ at $q=0.45$, where the seeded community remains fully adopted while the others stay at $0$--$12\%$ (Figure~\ref{fig:game-bar}). This empirically confirms the theoretical result that a sufficiently dense cluster (density $>1-q$) halts a cascade: the topical communities of Section~\ref{sec:cd} act as diffusion barriers.
-
-\subsection{Homophilous coordination along topical lines}
-The novel, semantic ingredient uses the text-derived topical groups. Fixing $q=0.40$ and seeding an entire topical group, the cross-topic weight $\omega$ has a striking effect (Figure~\ref{fig:game-omega}): while cross-topic coordination stays fairly symmetric ($\omega\ge0.5$) the cascade still floods the whole network ($100\%$ spill-over), but once same-topic coordination is preferred strongly enough ($\omega\le0.25$) the spill-over collapses, to $8.3\%$ ($2.3\%$ at $\omega=0.1$) for the largest topical group and to just $3.9\%$ ($0.6\%$ at $\omega=0.1$) for a smaller, tighter one, confining the cascade to the seeded group. Repeating the sweep for a second seeded group (varying the initial conditions) confirms the pattern, the denser group forming the stronger barrier. Homophilous coordination along topical lines is thus enough to turn the semantic structure into a near-perfect barrier, a behavioral counterpart to the topical echo chambers studied in Section~\ref{sec:open}.
-
 \begin{figure}[h]
   \centering
   \includegraphics[width=\linewidth]{figures/game_threshold_seeding.png}
@@ -75,6 +69,8 @@ The novel, semantic ingredient uses the text-derived topical groups. Fixing $q=0
   \label{fig:game-thr}
 \end{figure}
 
+\subsection{Communities as barriers}
+Seeding an entire community and increasing $q$, the spill-over into the other communities exhibits a sharp transition around $q\approx0.41$: it stays at $100\%$ for $q\le0.40$ but collapses to $<2\%$ at $q=0.45$, where the seeded community remains fully adopted while the others stay at $0$--$12\%$ (Figure~\ref{fig:game-bar}). This empirically confirms the theoretical result that a sufficiently dense cluster (density $>1-q$) halts a cascade: the topical communities of Section~\ref{sec:cd} act as diffusion barriers.
 \begin{figure}[h]
   \centering
   \includegraphics[width=0.49\linewidth]{figures/game_community_barriers.png}\hfill
@@ -82,6 +78,9 @@ The novel, semantic ingredient uses the text-derived topical groups. Fixing $q=0
   \caption{Communities as diffusion barriers. Left: the spill-over outside the seeded community stays at $100\%$ for $q\le0.40$ and collapses sharply once $q$ exceeds $\approx0.41$. Right: at $q=0.45$ the cascade stays confined to the seeded community (red).}
   \label{fig:game-bar}
 \end{figure}
+
+\subsection{Homophilous coordination along topical lines}
+The novel, semantic ingredient uses the text-derived topical groups. Fixing $q=0.40$ and seeding an entire topical group, the cross-topic weight $\omega$ has a striking effect (Figure~\ref{fig:game-omega}): while cross-topic coordination stays fairly symmetric ($\omega\ge0.5$) the cascade still floods the whole network ($100\%$ spill-over), but once same-topic coordination is preferred strongly enough ($\omega\le0.25$) the spill-over collapses, to $8.3\%$ ($2.3\%$ at $\omega=0.1$) for the largest topical group and to just $3.9\%$ ($0.6\%$ at $\omega=0.1$) for a smaller, tighter one, confining the cascade to the seeded group. Repeating the sweep for a second seeded group (varying the initial conditions) confirms the pattern, the denser group forming the stronger barrier. Homophilous coordination along topical lines is thus enough to turn the semantic structure into a near-perfect barrier, a behavioral counterpart to the topical echo chambers studied in Section~\ref{sec:open}.
 
 \begin{figure}[h]
   \centering
