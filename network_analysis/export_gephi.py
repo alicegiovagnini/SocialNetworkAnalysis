@@ -10,7 +10,9 @@ visualisation:
 Outputs (in the data directory):
   - network_full.gexf : the whole 15k-node network (faithful but heavy);
   - network_viz.gexf  : a community-stratified sample (default ~2000 nodes),
-                        much lighter and cleaner for a ForceAtlas2 layout.
+                        much lighter and cleaner for a ForceAtlas2 layout;
+  - network_viz_sparse.gexf : an even lighter ~650-node stratified sample, the
+                        one used for the report figure (network_communities.pdf).
 
 Usage:
     python export_gephi.py
@@ -113,6 +115,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--sample", type=int, default=2000,
                     help="approx. number of nodes for the lighter viz export")
+    ap.add_argument("--sparse", type=int, default=690,
+                    help="approx. number of nodes for the sparse figure export")
     ap.add_argument("--data-dir", default=None)
     args = ap.parse_args()
 
@@ -136,6 +140,16 @@ def main():
     nx.write_gexf(H, viz)
     print(f"[gephi] sampled network ({H.number_of_nodes()} nodes, "
           f"{H.number_of_edges()} edges) -> {viz}")
+
+    # even lighter sample, the one used for the report figure (network_communities.pdf)
+    random.seed(42)
+    S = stratified_sample(G, comm, args.sparse)
+    annotate(S, comm, handles)
+    sparse = os.path.join(data_dir, "network_viz_sparse.gexf")
+    nx.write_gexf(S, sparse)
+    print(f"[gephi] sparse network ({S.number_of_nodes()} nodes, "
+          f"{S.number_of_edges()} edges) -> {sparse}")
+
     print("\n[gephi] open network_viz.gexf in Gephi; ForceAtlas2 layout, then "
           "colour by 'community' and size by 'degree'. See the file header for steps.")
 
