@@ -2,7 +2,7 @@
 PART 3 (MANIPULATION cluster) - Diffusion (NDlib).
 
 Simulates the diffusion models - SI, SIS, SIR and Threshold -
-as required by the assignment, BOTH on the collected data AND on synthetic
+on both the collected data and on synthetic
 graphs (ER and BA) with (almost) the same number of nodes/edges. Analyses the
 results varying the model parameters and the initial conditions (infection seeds).
 

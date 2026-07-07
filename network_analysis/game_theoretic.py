@@ -2,8 +2,7 @@
 PART 3 (extension) - Game-theoretic cascade model (decision-based).
 
 Implements a two-player coordination game played on each edge, coded from
-scratch in Python (the "coded in Python" option allowed by the assignment for
-the custom-model task; NDlib is used for the SI/SIS/SIR/Threshold baseline in
+scratch in Python (NDlib is used only for the SI/SIS/SIR/Threshold baseline in
 diffusion.py). Each node chooses A or B; the payoff increases if it chooses
 like its neighbours. The decision rule reduces to a THRESHOLD:
 
@@ -15,7 +14,7 @@ topology, the outcome is unique (unlike the stochastic SI/SIS/SIR models).
 
 The ad-hoc/novel ingredient is a COMMUNITY-AWARE variant that down-weights
 coordination across group boundaries by a factor omega in [0,1]. The grouping
-uses BOTH kinds of information required by the task:
+uses BOTH kinds of information:
   - network TOPOLOGY: the Louvain community structure (Experiment 2);
   - external SEMANTIC information: a topical label for each account derived from
     the TEXT of its posts (TF-IDF + KMeans), i.e. genuine node-attached

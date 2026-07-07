@@ -2,7 +2,7 @@
 \label{sec:data}
 
 \subsection{Selected Data Sources}
-The network is built from Bluesky Social, a microblogging platform based on the open AT Protocol~\cite{atproto}. Its public read endpoints (\url{https://public.api.bsky.app}) are served from a cached, ``public-web'' API that requires no authentication, account or API key, which makes the collection free and fully reproducible. The network is modelled as follows:
+The network is built from Bluesky Social, a microblogging platform based on the open AT Protocol~\cite{atproto}. Its public read endpoints (\url{https://public.api.bsky.app}) are served from a cached, ``public-web'' API that requires no authentication, account or API key, which makes the collection free and fully reproducible. The network is modeled as follows:
 \begin{itemize}\itemsep0pt
   \item Node: an account, identified by its DID (Decentralized Identifier), a persistent key that remains stable even when the user changes handle;
   \item Edge: a directed follow relationship $u\!\to\!v$ (``$u$ follows $v$''). The relationship is binary, hence the graph is unweighted; for Part~2 its simple, undirected version is used, as required;
@@ -14,10 +14,10 @@ All data were obtained through five read-only AT~Protocol endpoints: \texttt{sea
 \subsection{Seed selection}
 The crawl is seeded with five thematic ``hub'' accounts, chosen as follows. The account-search endpoint (\texttt{app.bsky.\allowbreak actor.\allowbreak searchActors}) was queried with the keyword \texttt{science}, obtaining 25 candidate accounts, and five of them were manually selected according to two criteria:
 \begin{itemize}
-    \item type diversity: to avoid starting from a single bubble, mixing organisations/media and individual communicators/aca\-demics.
-    \item thematic centrality: preferring recognisable accounts that follow many members of the scientific community, so that the snowball fans out into several sub-communities. 
+    \item type diversity: to avoid starting from a single bubble, mixing organizations/media and individual communicators/aca\-demics.
+    \item thematic centrality: preferring recognizable accounts that follow many members of the scientific community, so that the snowball fans out into several sub-communities. 
     \end{itemize}
-    The selected seeds are \texttt{science.org} (Science Magazine), \texttt{scifri} (Science Friday), \texttt{standupforscience} (the ``Stand Up for Science'' movement), \texttt{whysharksmatter} (marine biologist D.~Shiffman) and \texttt{carlbergstrom} (academic C.~T.~Bergstrom): three outlets/organisations and two individual communicators. For reproducibility, it is worth noting that this endpoint returns a stable ranking (re-running the query reproduces the same 25 results, with the five seeds at ranks 6, 7, 11, 18 and 19), unlike the platform's interactive search bar, which relies on a different, personalised type-ahead endpoint and therefore yields a different ordering.
+    The selected seeds are \texttt{science.org} (Science Magazine), \texttt{scifri} (Science Friday), \texttt{standupforscience} (the ``Stand Up for Science'' movement), \texttt{whysharksmatter} (marine biologist D.~Shiffman) and \texttt{carlbergstrom} (academic C.~T.~Bergstrom): three outlets/organizations and two individual communicators. For reproducibility, it is worth noting that this endpoint returns a stable ranking (re-running the query reproduces the same 25 results, with the five seeds at ranks 6, 7, 11, 18 and 19), unlike the platform's interactive search bar, which relies on a different, personalised type-ahead endpoint and therefore yields a different ordering.
     
 
 
@@ -34,12 +34,12 @@ Two parameters govern the process. The node budget is \texttt{MAX\_NODES}~$=15{,
 Once the graph is built, node attributes are retrieved in batches of 25 (\texttt{getProfiles}) and, for every node, a sample of up to 20 posts is collected (\texttt{getAuthorFeed}), storing for each post its text, creation timestamp, like count and repost count. The post layer comprises 271{,}001 posts and covers 14{,}610 of the 15{,}000 accounts (97.4\%); the remaining $\sim$3\% are profiles with no public posts or accounts that became unavailable after the crawl.
 
 \subsection{Sample statistics}
-The final network (simple, undirected version) has 15{,}000 nodes and 1{,}665{,}495 edges; it consists of a single connected component (giant component covering 100\% of the nodes). The account-creation timeline also characterises the community temporally (Figure~\ref{fig:creation}): adoption arrives in two waves: a first influx in mid-2023, when the platform opened more widely, and a sharp spike in November~2024 ($3{,}641$ accounts in that single month) matching the well-documented migration from X/Twitter.
+The final network (simple, undirected version) has 15{,}000 nodes and 1{,}665{,}495 edges; it consists of a single connected component (giant component covering 100\% of the nodes). The account-creation timeline also characterizes the community temporally (Figure~\ref{fig:creation}): adoption arrives in two waves: a first influx in mid-2023, when the platform opened more widely, and a sharp spike in November~2024 ($3{,}641$ accounts in that single month) matching the well-documented migration from X/Twitter.
 
 \begin{figure}[h]
   \centering
   \includegraphics[width=\linewidth]{figures/account_creation.png}
-  \caption{Account-creation dates of the collected accounts (monthly)}
+  \caption{Account-creation dates of the collected accounts (monthly).}
   \label{fig:creation}
 \end{figure}
 
@@ -49,10 +49,10 @@ Identifiers are clean (no malformed or duplicate DIDs) and the core attributes h
 \subsection{Choices and limitations}
 Several deliberate choices shape and bound the sample.
 \begin{itemize}
-    \item Seed dependence: the sample characterises the community around the seeds, not the whole platform, and the manual, heuristic seed choice influences the observed structure.
+    \item Seed dependence: the sample characterizes the community around the seeds, not the whole platform, and the manual, heuristic seed choice influences the observed structure.
     \item Follow truncation: capping follow lists at 1{,}000 entries truncates the most prolific accounts (e.g.\ \texttt{carlbergstrom} follows 2{,}624 accounts and \texttt{whysharksmatter} 1{,}539, of which only $\sim$1{,}000 are recorded), introducing a recency bias on such nodes.
-    \item Outgoing-only crawl: only follows are traversed, never followers, so in-degree reflects internal visibility rather than true popularity. 
+    \item Outgoing-only crawl: only follows are traversed, never followers, so in-degree reflects internal visibility, not true popularity. 
     \item Hard node cap: the 15{,}000-node boundary is fixed by the BFS traversal order, not by an organic frontier, so accounts discovered after the cap (even within the same community) are excluded. 
     \item Unweighted edges and sampled posts: the follow relation is binary and the post layer is a per-account sample. 
 \end{itemize}
-All results should therefore be read as characterising the crawled scientific community, not the entire Bluesky platform.
+All results should therefore be read as characterizing the crawled scientific community, not the entire Bluesky platform.

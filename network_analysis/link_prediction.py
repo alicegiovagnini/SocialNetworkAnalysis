@@ -2,7 +2,7 @@
 PART 3 (ANALYTICAL cluster) - Link Prediction.
 
 Follows Liben-Nowell & Kleinberg, "The link prediction problem for social
-networks" (CIKM 2003), required by the assignment:
+networks" (CIKM 2003):
 
   - the network is split into TRAIN (80% of edges) and TEST (20% of edges);
   - on the TRAIN graph the classic unsupervised predictors are computed:

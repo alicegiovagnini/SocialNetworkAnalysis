@@ -41,8 +41,9 @@ the project.
 │   ├── game_theoretic.py      # Part 3 (custom): coordination-game cascade
 │   └── plots/                 # figures used in the report (Parts 2–3)
 ├── open_problem/         # Part 4 — open question
-│   ├── open_question.py  #   topical echo chambers (TF-IDF + communities)
-│   └── plots/            #   figures used in the report (Part 4)
+│   ├── open_question.py       #   topical echo chambers (TF-IDF + communities)
+│   ├── open_question_null.py  #   degree-preserving null control (robustness)
+│   └── plots/                 #   figures used in the report (Part 4)
 ├── report/               # Part 5 — report (ACM template, acmart)
 │   └── main.tex          #   compile on Overleaf (pdfLaTeX + BibTeX)
 ├── README.md
@@ -100,6 +101,7 @@ python network_analysis/link_prediction.py      # Part 3 (analytical)
 python network_analysis/diffusion.py            # Part 3 (manipulation)
 python network_analysis/game_theoretic.py       # Part 3 (custom cascade)
 python open_problem/open_question.py            # Part 4
+python open_problem/open_question_null.py       # Part 4 (degree-preserving control)
 ```
 
 Figures are written to `data_collection/data/figures/`; the ones used in the

@@ -263,6 +263,14 @@ def main():
     er, ba = make_reference_graphs(real["n"], real["m"])
     clustering_stats(er, "ER")
     clustering_stats(ba, "BA")
+    # path length on the synthetic graphs (same sampled-BFS method as the real net,
+    # on their giant component), for the ER/BA comparison
+    print("\nPATHS on synthetic graphs (giant component, same sampling)")
+    for lbl, H in [("ER", er), ("BA", ba)]:
+        Hg = H if nx.is_connected(H) else H.subgraph(
+            max(nx.connected_components(H), key=len)).copy()
+        print(f"[{lbl}]")
+        path_stats(Hg, n_samples=args.path_samples)
 
     # figures
     print("\nFIGURES")

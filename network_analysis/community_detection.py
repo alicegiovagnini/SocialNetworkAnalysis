@@ -1,8 +1,8 @@
 """
-COMMUNITY DETECTION (required by the assignment).
+COMMUNITY DETECTION.
 
 Identifies, evaluates and compares the modular structure of the network with
-THREE community detection algorithms (CDlib), as required:
+THREE community detection algorithms (CDlib):
   1. Louvain           (modularity optimisation)
   2. Label Propagation  (label propagation)
   3. Infomap           (flows / random walk)
@@ -58,6 +58,10 @@ def load_attrs(data_dir):
     p = os.path.join(data_dir, "node_attributes.json")
     if os.path.exists(p):
         with open(p) as f:
+            return json.load(f)
+    gzp = p + ".gz"                       # committed fallback (carries the bios)
+    if os.path.exists(gzp):
+        with gzip.open(gzp, "rt", encoding="utf-8") as f:
             return json.load(f)
     return {}
 

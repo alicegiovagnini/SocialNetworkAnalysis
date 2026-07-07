@@ -21,6 +21,7 @@ with gzip.open("network_undirected.edgelist.gz", "rt") as f:
 |------|--------|------|-------------|
 | `node_attributes.csv` | CSV | 1.6 MB | Node attribute table (decompressed copy). |
 | `node_attributes.csv.gz` | gzip CSV | 0.8 MB | Same table, compressed. |
+| `node_attributes.json.gz` | gzip JSON | ~1.5 MB | Full attribute dict incl. the free-text **bio/description** (absent from the CSV); used by `community_detection.py` for the per-community keyword labels. |
 | `communities.csv` | CSV | 0.5 MB | Louvain community per node. |
 | `network_undirected.edgelist.gz` | gzip | 27 MB | **Simple, undirected, unweighted** network — Part 2. |
 | `network_directed.edgelist.gz` | gzip | 31 MB | Directed follow network (`u → v`). |
@@ -55,4 +56,6 @@ undirected file lists each edge once; the directed file keeps the follow directi
 - Intermediate crawl files (`nodes.json`, `raw_edges.jsonl`, `crawl_state.pkl`, …)
   and the uncompressed copies (`node_attributes.json`, `posts_sample.jsonl`) are
   not committed (gitignored) — they are re-creatable from the pipeline / the
-  `.gz` files.
+  `.gz` files. The compressed `node_attributes.json.gz` (which also carries the
+  free-text bio/description, absent from the CSV) **is** committed, so
+  `community_detection.py` reproduces the per-community keyword labels offline.
